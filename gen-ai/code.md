@@ -1,16 +1,31 @@
+### 청크 사이즈의 변경
+
 ```python
-# 띄어쓰기 단위로 분리
-input_text = "나는 AI를 공부하고 있다."
-input_text_list = input_text.split()
-print("input_text_list: ", input_text_list)
+from langchain.text_splitter import CharacterTextSplitter
 
-# 토큰 -> 아이디 딕셔너리와 아이디 -> 토큰 딕셔너리 만들기
-str2idx = {word:idx for idx, word in enumerate(input_text_list)}
-idx2str = {idx:word for idx, word in enumerate(input_text_list)}
-print("str2idx: ", str2idx)
-print("idx2str: ", idx2str)
+# 문서 내용 예시
+text = """
+LangChain은 LLM 애플리케이션 개발을 돕는 강력한 도구입니다.
+이 도구를 사용하면 문서를 다양한 방식으로 처리할 수 있습니다.
+"""
 
-# 토큰을 토큰 아이디로 변환
-input_ids = [str2idx[word] for word in input_text_list]
-print("input_ids: ", input_ids)
+# 청크 크기와 중첩 범위 설정
+chunk_size = 50             # 청크 크기
+chunk_overlap = 10          # 청크 간 중첩
+
+# TextSplitter 초기화
+text_splitter = CharacterTextSplitter(
+    chunk_size=chunk_size,
+    chunk_overlap=chunk_overlap,
+    separator="\n"          # 문단별로 나누고 싶다면 '\n' 사용
+)
+
+# 문서를 청크로 분할
+chunks = text_splitter.split_text(text)
+
+# 결과 확인
+for i, chunk in enumerate(chunks):
+    print(f"청크 {i+1}:")
+    print(chunk)
+    print("-" * 50)
 ```
