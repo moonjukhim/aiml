@@ -1,0 +1,9 @@
+streamlit
+requests
+botocore
+aws_requests_auth
+pillow
+boto3
+matplotlib
+yfinance
+fpdf
