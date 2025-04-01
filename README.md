@@ -1,8 +1,8 @@
 # AI/ML
 
-- 1. Generative AI
-- 2. Agentic AI
-- 3. Vibe Coding
+1. Generative AI
+2. Agentic AI
+3. Vibe Coding
 
 ---
 
