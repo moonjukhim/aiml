@@ -1,4 +1,10 @@
-# aiml
+# AI/ML
+
+- Generative AI
+- Agentic AI
+
+---
+
 
 - AI 신뢰, 리스크 및 보안 관리
 - 지속적인 위험 노출 관리
