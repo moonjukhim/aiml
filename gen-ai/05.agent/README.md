@@ -14,7 +14,7 @@ Instructions for the Agent
 
 3. Action Group을 추가
 
-4. 
+4. Action Group에서 사용하는 Lambda 함수 생성
 
 ```bash
 
