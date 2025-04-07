@@ -3,11 +3,11 @@
 1. 생성형 AI의 기초
 2. 생성형 AI 사용
 3. 프롬프트 엔지니어링
-4. 파인튜닝을 통한 LLM 최적화
-5. 임베딩과 모델 아키텍처 맞춤화
-6. 검색증강생성(RAG)와 에이전트
-7. Multimodal 기초 모델
-8. 총정리, LLM을 프로덕션 환경에 적용
+4. Knowledge Bases를 사용한 RAG
+5. Agent part-1
+6. Agent part-2
+7. Flows
+8. GenAI Application
 
 ---
 
