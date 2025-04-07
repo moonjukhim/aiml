@@ -16,10 +16,12 @@ Instructions for the Agent
 
 4. Action Group에서 사용하는 Lambda 함수 생성
 
+[함수의 구조, 반환 결과값의 구조](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html)
+
 ```bash
 
 pip install requests -t ./my_lambda_package
 cp lambda_function.py my_lambda_package/
 cd my_lambda_package
-zip -r9 my_lambda_function.zip .
+zip -r my_lambda_function.zip .
 ```
