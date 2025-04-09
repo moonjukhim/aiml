@@ -5,7 +5,7 @@ import boto3
 import matplotlib.pyplot as plt
 import streamlit as st
 
-AGENT_ID = "WEX9IMPEWB"
+AGENT_ID = "LUWNIOZEVK"
 REGION = "us-east-1"
 IMAGE_FOLDER = "images"
 
@@ -30,19 +30,26 @@ def generate_random_15digit():
 
 def invoke_bedrock_agent(inputText, sessionId, trace_container, endSession=False):
     # Invoke the Bedrock agent with the given input text
-    response = bedrock_agent_runtime.invoke_agent(
-        agentAliasId="TSTALIASID",
-        agentId=AGENT_ID,
-        sessionId=sessionId,
-        inputText=inputText,
-        endSession=endSession,
-        enableTrace=True,
+    response = bedrock_agent_runtime.invoke_flow(
+        flowIdentifier="LUWNIOZEVK",
+        flowAliasIdentifier="TSTALIASID",
+        inputs = [
+            { 
+                "content": { 
+                    "document": inputText
+                },
+                "nodeName": "FlowInputNode",
+                "nodeOutputName": "document"
+            }
+        ]
     )
 
+
     # Get the event stream from the response
-    event_stream = response["completion"]
+    event_stream = response["responseStream"]
 
     model_response = {"text": "", "images": [], "files": [], "traces": []}
+    
 
     # Process each event in the stream
     for index, event in enumerate(event_stream):
@@ -51,192 +58,13 @@ def invoke_bedrock_agent(inputText, sessionId, trace_container, endSession=False
         print("\n")
 
         try:
-            # Check trace
-            if "trace" in event:
-                if (
-                    "trace" in event["trace"]
-                    and "orchestrationTrace" in event["trace"]["trace"]
-                ):
-                    trace_event = event["trace"]["trace"]["orchestrationTrace"]
-                    if "rationale" in trace_event:
-                        trace_text = trace_event["rationale"]["text"]
-                        trace_object = {"trace_type": "rationale", "text": trace_text}
-                        model_response["traces"].append(trace_object)
-
-                        with trace_container.expander("rationale"):
-                            st.markdown(trace_text)
-
-                    # for invocationInput type
-                    if "invocationInput" in trace_event:
-                        if (
-                            "codeInterpreterInvocationInput"
-                            in trace_event["invocationInput"]
-                        ):
-                            trace_code = trace_event["invocationInput"][
-                                "codeInterpreterInvocationInput"
-                            ]["code"]
-                            trace_object = {
-                                "trace_type": "codeInterpreter",
-                                "text": trace_code,
-                            }
-                            model_response["traces"].append(trace_object)
-
-                            with trace_container.expander("codeInterpreter"):
-                                st.code(trace_code)
-                        if "knowledgeBaseLookupInput" in trace_event["invocationInput"]:
-                            trace_text = trace_event["invocationInput"][
-                                "knowledgeBaseLookupInput"
-                            ]["text"]
-                            trace_object = {
-                                "trace_type": "knowledgeBaseLookup",
-                                "text": trace_text,
-                            }
-                            model_response["traces"].append(trace_object)
-
-                            with trace_container.expander("knowledgeBaseLookup"):
-                                st.markdown(trace_text)
-
-                        if (
-                            "actionGroupInvocationInput"
-                            in trace_event["invocationInput"]
-                        ):
-                            trace_text = trace_event["invocationInput"][
-                                "actionGroupInvocationInput"
-                            ]["function"]
-                            trace_object = {
-                                "trace_type": "actionGroupInvocation",
-                                "text": trace_text,
-                            }
-                            model_response["traces"].append(trace_object)
-
-                            with trace_container.expander("actionGroupInvocation"):
-                                st.markdown(f"Calling function: {trace_text}")
-
-                    # for observation type
-                    if "observation" in trace_event:
-                        if (
-                            "codeInterpreterInvocationOutput"
-                            in trace_event["observation"]
-                        ):
-                            if (
-                                "executionOutput"
-                                in trace_event["observation"][
-                                    "codeInterpreterInvocationOutput"
-                                ]
-                            ):
-                                trace_resp = trace_event["observation"][
-                                    "codeInterpreterInvocationOutput"
-                                ]["executionOutput"]
-                                trace_object = {
-                                    "trace_type": "observation",
-                                    "text": trace_resp,
-                                }
-                                model_response["traces"].append(trace_object)
-
-                                with trace_container.expander("observation"):
-                                    st.markdown(trace_resp)
-                            if (
-                                "executionError"
-                                in trace_event["observation"][
-                                    "codeInterpreterInvocationOutput"
-                                ]
-                            ):
-                                trace_resp = trace_event["observation"][
-                                    "codeInterpreterInvocationOutput"
-                                ]["executionError"]
-                                trace_object = {
-                                    "trace_type": "observation",
-                                    "text": trace_resp,
-                                }
-                                model_response["traces"].append(trace_object)
-
-                                with trace_container.expander("observation"):
-                                    st.error(trace_resp)
-
-                        if "knowledgeBaseLookupOutput" in trace_event["observation"]:
-                            # trace_text = trace_event["observation"][
-                            #     "knowledgeBaseLookupOutput"
-                            # ]["text"]
-                            trace_object = {
-                                "trace_type": "knowledgeBaseLookupOutput",
-                                "text": trace_event["observation"][
-                                    "knowledgeBaseLookupOutput"
-                                ]["retrievedReferences"],
-                            }
-                            model_response["traces"].append(trace_object)
-
-                            with trace_container.expander("knowledgeBaseLookupOutput"):
-                                # st.markdown(trace_text)
-
-                                if (
-                                    "retrievedReferences"
-                                    in trace_event["observation"][
-                                        "knowledgeBaseLookupOutput"
-                                    ]
-                                ):
-                                    references = trace_event["observation"][
-                                        "knowledgeBaseLookupOutput"
-                                    ]["retrievedReferences"]
-                                    for reference in references:
-                                        st.markdown(
-                                            f'{reference["location"]["s3Location"]["uri"]}'
-                                        )
-                                        st.markdown(f'{reference["content"]["text"]}')
-
-                        if "actionGroupInvocationOutput" in trace_event["observation"]:
-                            trace_resp = trace_event["observation"][
-                                "actionGroupInvocationOutput"
-                            ]["text"]
-                            trace_object = {
-                                "trace_type": "observation",
-                                "text": trace_resp,
-                            }
-                            model_response["traces"].append(trace_object)
-
-                            with trace_container.expander("observation"):
-                                st.markdown(trace_resp)
-
-                        if "finalResponse" in trace_event["observation"]:
-                            trace_resp = trace_event["observation"]["finalResponse"][
-                                "text"
-                            ]
-                            trace_object = {
-                                "trace_type": "finalResponse",
-                                "text": trace_resp,
-                            }
-                            model_response["traces"].append(trace_object)
-
-                            with trace_container.expander("finalResponse"):
-                                st.markdown(trace_resp)
-
-                elif "guardrailTrace" in event["trace"]["trace"]:
-
-                    guardrail_trace = event["trace"]["trace"]["guardrailTrace"]
-                    if "inputAssessments" in guardrail_trace:
-                        assessments = guardrail_trace["inputAssessments"]
-                        for assessment in assessments:
-                            if "contentPolicy" in assessment:
-                                filters = assessment["contentPolicy"]["filters"]
-                                for filter in filters:
-                                    if filter["action"] == "BLOCKED":
-                                        st.error(
-                                            f"Guardrail blocked {filter['type']} confidence: {filter['confidence']}"
-                                        )
-                            if "topicPolicy" in assessment:
-                                topics = assessment["topicPolicy"]["topics"]
-                                for topic in topics:
-                                    if topic["action"] == "BLOCKED":
-                                        st.error(
-                                            f"Guardrail blocked topic {topic['name']}"
-                                        )
+            
             # Handle text chunks
-            if "chunk" in event:
-                chunk = event["chunk"]
-                if "bytes" in chunk:
-                    text = chunk["bytes"].decode("utf-8")
-                    print(f"Chunk: {text}")
-                    model_response["text"] += text
-                    return model_response
+            if index == 0:
+                text = event["flowOutputEvent"]["content"]["document"]
+                model_response["text"] += text
+                return model_response
+
 
             # Handle file outputs
             if "files" in event:
