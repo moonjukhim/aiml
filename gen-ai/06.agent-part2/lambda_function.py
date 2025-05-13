@@ -19,10 +19,11 @@ def lambda_handler(event, context):
         data = response.json()
         
         temperature = data['main']['temp']
+        humidity = data['main']['humidity']
 
         response_body = {
             'TEXT' : {
-                'body': temperature
+                'body': f"Temperature: {temperature}K, Humidity: {humidity}%"
             }
         }
 
